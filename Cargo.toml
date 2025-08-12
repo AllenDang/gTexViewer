@@ -1,0 +1,71 @@
+[package]
+name = "gtexviewer"
+version = "1.0.0"
+edition = "2024"
+authors = ["Allen Dang <allengnr@gmail.com>"]
+description = "A game texture viewer supporting various formats"
+license = "MIT"
+
+[package.metadata.bundle]
+name = "gTexViewer"
+identifier = "com.allendang.gtexviewer"
+icon = ["assets/icon/app.png"]
+version = "1.0.0"
+copyright = "Copyright (c) Allen Dang 2023. All rights reserved."
+category = "Developer Tool"
+short_description = "A game texture viewer supporting various formats"
+
+[profile.release]
+strip = "symbols"
+lto = "fat"
+opt-level = "z"
+codegen-units = 1
+panic = "abort"
+
+[profile.release.package."*"]
+strip = "symbols"
+opt-level = "z"
+codegen-units = 1
+
+[dependencies]
+# Image processing
+image = { version = "0.25", features = [
+  "avif-native",
+  "bmp",
+  "exr",
+  "ff",
+  "gif",
+  "hdr",
+  "ico",
+  "jpeg",
+  "png",
+  "pnm",
+  "qoi",
+  "tga",
+  "tiff",
+  "webp",
+] }
+ktx2-rw = { path = "../ktx2-rw" }
+texture2ddecoder = { version = "0.1.2", features = ["alloc"] }
+
+# Error handling and utilities
+anyhow = "1.0"
+log = "0.4"
+env_logger = "0.11"
+
+# Layout engine
+taffy = { version = "0.8", features = ["grid"] }
+
+# GLB/GLTF support
+gltf = { version = "1.4", features = ["extras", "names"] }
+
+# Image format detection and size reading
+imagesize = { git = "https://github.com/AllenDang/imagesize" }
+macroquad = { git = "https://github.com/AllenDang/macroquad" }
+
+# Parallel processing
+rayon = "1.10"
+itertools = "0.14.0"
+
+# Archive support
+zip = "2.1"

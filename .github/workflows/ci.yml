@@ -44,7 +44,7 @@ jobs:
     - name: Setup cross-compilation environment
       if: matrix.target == 'x86_64-pc-windows-gnu'
       run: |
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-dav1d mingw-w64-x86_64-pkg-config
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-dav1d mingw-w64-x86_64-pkg-config
         echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" >> $env:GITHUB_ENV
         echo "PKG_CONFIG=C:\msys64\mingw64\bin\pkg-config.exe" >> $env:GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_CROSS=1" >> $env:GITHUB_ENV
@@ -116,7 +116,7 @@ jobs:
     - name: Setup cross-compilation environment
       if: matrix.target == 'x86_64-pc-windows-gnu'
       run: |
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-dav1d mingw-w64-x86_64-pkg-config
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-dav1d mingw-w64-x86_64-pkg-config
         echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" >> $env:GITHUB_ENV
         echo "PKG_CONFIG=C:\msys64\mingw64\bin\pkg-config.exe" >> $env:GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_CROSS=1" >> $env:GITHUB_ENV

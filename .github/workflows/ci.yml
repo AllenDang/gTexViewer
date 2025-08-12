@@ -35,7 +35,7 @@ jobs:
       if: matrix.target == 'x86_64-pc-windows-gnu'
       uses: goto-bus-stop/setup-zig@v2
       with:
-        version: 0.11.0
+        version: 0.13.0
     
     - name: Install cargo-zigbuild
       if: matrix.target == 'x86_64-pc-windows-gnu'
@@ -49,6 +49,7 @@ jobs:
         echo "PKG_CONFIG=C:\msys64\mingw64\bin\pkg-config.exe" >> $env:GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_CROSS=1" >> $env:GITHUB_ENV
         echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
+        echo "CARGO_ZIGBUILD_ZIG_CC_EXTRA_ARGS=--sysroot=C:\msys64\mingw64 -IC:\msys64\mingw64\include" >> $env:GITHUB_ENV
 
     - name: Install system dependencies (Linux)
       if: runner.os == 'Linux'
@@ -107,7 +108,7 @@ jobs:
       if: matrix.target == 'x86_64-pc-windows-gnu'
       uses: goto-bus-stop/setup-zig@v2
       with:
-        version: 0.11.0
+        version: 0.13.0
     
     - name: Install cargo-zigbuild
       if: matrix.target == 'x86_64-pc-windows-gnu'
@@ -121,6 +122,7 @@ jobs:
         echo "PKG_CONFIG=C:\msys64\mingw64\bin\pkg-config.exe" >> $env:GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_CROSS=1" >> $env:GITHUB_ENV
         echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
+        echo "CARGO_ZIGBUILD_ZIG_CC_EXTRA_ARGS=--sysroot=C:\msys64\mingw64 -IC:\msys64\mingw64\include" >> $env:GITHUB_ENV
 
     - name: Install system dependencies (Linux)
       if: runner.os == 'Linux'

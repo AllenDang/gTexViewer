@@ -107,11 +107,6 @@ jobs:
         cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} dist/
         create-dmg \
           --volname "gTexViewer" \
-          --window-pos 200 120 \
-          --window-size 800 400 \
-          --icon-size 100 \
-          --icon "gtexviewer" 200 190 \
-          --hide-extension "gtexviewer" \
           --app-drop-link 600 185 \
           "${{ matrix.asset_name }}.dmg" \
           "dist/"

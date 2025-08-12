@@ -53,9 +53,9 @@ jobs:
       if: matrix.target == 'x86_64-pc-windows-gnu'
       run: cargo install cargo-zigbuild
 
-    - name: Install create-dmg for macOS
+    - name: Install cargo-bundle for macOS
       if: runner.os == 'macOS'
-      run: npm install --global create-dmg
+      run: cargo install cargo-bundle
 
     - name: Setup cross-compilation environment
       if: matrix.target == 'x86_64-pc-windows-gnu'
@@ -92,19 +92,42 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Build release
-      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose' || (matrix.target && format('cargo build --release --verbose --target {0}', matrix.target) || 'cargo build --release --verbose') }}
+      run: |
+        if [ "${{ matrix.target }}" = "x86_64-pc-windows-gnu" ]; then
+          cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose
+        elif [ "${{ runner.os }}" = "macOS" ]; then
+          cargo bundle --release --verbose
+        elif [ -n "${{ matrix.target }}" ]; then
+          cargo build --release --verbose --target ${{ matrix.target }}
+        else
+          cargo build --release --verbose
+        fi
 
     - name: Create macOS DMG
       if: runner.os == 'macOS'
       run: |
+        # Debug: Check what cargo bundle actually created
+        echo "Checking target/release/bundle structure:"
+        find target/release/bundle -name "*.app" -type d 2>/dev/null || echo "No .app bundles found"
+        ls -la target/release/bundle/ 2>/dev/null || echo "No bundle directory found"
+        
         mkdir -p dist
-        if [ -n "${{ matrix.target }}" ]; then
-          cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} dist/
+        
+        # Copy the app bundle created by cargo bundle
+        if [ -d "target/release/bundle/osx/gTexViewer.app" ]; then
+          cp -r target/release/bundle/osx/gTexViewer.app dist/
         else
-          cp target/release/${{ matrix.artifact_name }} dist/
+          echo "App bundle not found at expected location"
+          exit 1
         fi
         
-        # Use hdiutil instead of create-dmg for reliability
+        # Create Applications link for easy installation
+        ln -s /Applications dist/Applications
+        
+        echo "Contents of dist folder:"
+        ls -la dist/
+        
+        # Create DMG with the app bundle
         hdiutil create -volname "gTexViewer" -srcfolder "dist/" -ov -format UDZO "${{ matrix.asset_name }}.dmg"
 
     - name: Create Windows ZIP

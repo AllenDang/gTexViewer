@@ -8,7 +8,7 @@ fn load_app_icon() -> Option<macroquad::miniquad::conf::Icon> {
     use std::io::Cursor;
 
     // Load the icon PNG file
-    let icon_bytes = include_bytes!("..assets/icon/app.png");
+    let icon_bytes = include_bytes!("../assets/icon/app.png");
     let img = image::load(Cursor::new(icon_bytes), ImageFormat::Png).ok()?;
 
     // Convert to RGBA format

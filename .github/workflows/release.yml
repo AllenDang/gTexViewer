@@ -97,13 +97,7 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Build release
-      run: |
-        if [ "${{ matrix.target }}" = "x86_64-pc-windows-gnu" ]; then
-          cargo zigbuild --target ${{ matrix.target }} --release --verbose
-        else
-          cargo build --target ${{ matrix.target }} --release --verbose
-        fi
-      shell: bash
+      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose' || format('cargo build --release --verbose --target {0}', matrix.target) }}
 
     - name: Create macOS DMG
       if: runner.os == 'macOS'
@@ -112,7 +106,6 @@ jobs:
         cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} dist/
         create-dmg \
           --volname "gTexViewer" \
-          --volicon "assets/icon/app.ico" \
           --window-pos 200 120 \
           --window-size 800 400 \
           --icon-size 100 \

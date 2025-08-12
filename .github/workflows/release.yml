@@ -103,7 +103,9 @@ jobs:
         else
           cp target/release/${{ matrix.artifact_name }} dist/
         fi
-        create-dmg --volname "gTexViewer" "${{ matrix.asset_name }}.dmg" "dist/"
+        
+        # Use hdiutil instead of create-dmg for reliability
+        hdiutil create -volname "gTexViewer" -srcfolder "dist/" -ov -format UDZO "${{ matrix.asset_name }}.dmg"
 
     - name: Create Windows ZIP
       if: runner.os == 'Windows'

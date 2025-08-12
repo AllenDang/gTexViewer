@@ -103,11 +103,7 @@ jobs:
         else
           cp target/release/${{ matrix.artifact_name }} dist/
         fi
-        create-dmg \
-          --volname "gTexViewer" \
-          --app-drop-link 600 185 \
-          "${{ matrix.asset_name }}.dmg" \
-          "dist/"
+        create-dmg --volname "gTexViewer" "${{ matrix.asset_name }}.dmg" "dist/"
 
     - name: Create Windows ZIP
       if: runner.os == 'Windows'

@@ -45,7 +45,7 @@ image = { version = "0.25", features = [
   "tiff",
   "webp",
 ] }
-ktx2-rw = { path = "../ktx2-rw" }
+ktx2-rw = { git = "https://github.com/AllenDang/ktx2-rw" }
 texture2ddecoder = { version = "0.1.2", features = ["alloc"] }
 
 # Error handling and utilities
@@ -54,7 +54,7 @@ log = "0.4"
 env_logger = "0.11"
 
 # Layout engine
-taffy = { version = "0.8", features = ["grid"] }
+taffy = { version = "0.9", features = ["grid"] }
 
 # GLB/GLTF support
 gltf = { version = "1.4", features = ["extras", "names"] }
@@ -68,4 +68,4 @@ rayon = "1.10"
 itertools = "0.14.0"
 
 # Archive support
-zip = "2.1"
+zip = "4"

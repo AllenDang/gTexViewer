@@ -148,8 +148,8 @@ impl Source for ZipSource {
 impl ZipSource {
     /// Read header bytes incrementally until imagesize can determine dimensions
     /// or we reach a reasonable maximum size
-    fn read_header_incrementally(
-        entry: &mut zip::read::ZipFile,
+    fn read_header_incrementally<R: Read>(
+        entry: &mut zip::read::ZipFile<R>,
         max_size: usize,
     ) -> Result<Option<Vec<u8>>> {
         let mut header_size = 128; // Start small - most formats store dimensions early

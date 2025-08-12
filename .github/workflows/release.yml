@@ -30,11 +30,6 @@ jobs:
             artifact_name: gtexviewer.exe
             asset_name: gtexviewer-windows-x86_64
           - os: macos-latest
-            target: x86_64-apple-darwin
-            artifact_name: gtexviewer
-            asset_name: gtexviewer-macos-x86_64
-          - os: macos-latest
-            target: aarch64-apple-darwin
             artifact_name: gtexviewer
             asset_name: gtexviewer-macos-aarch64
 
@@ -82,13 +77,6 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew install dav1d
-        echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
-    
-    - name: Setup macOS cross-compilation
-      if: runner.os == 'macOS' && matrix.target == 'x86_64-apple-darwin'
-      run: |
-        echo "CARGO_TARGET_X86_64_APPLE_DARWIN_RUSTFLAGS=-L /opt/homebrew/lib" >> $GITHUB_ENV
-        echo "MACOSX_DEPLOYMENT_TARGET=10.12" >> $GITHUB_ENV
 
     - name: Cache cargo
       uses: actions/cache@v4
@@ -104,13 +92,17 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Build release
-      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose' || format('cargo build --release --verbose --target {0}', matrix.target) }}
+      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose' || (matrix.target && format('cargo build --release --verbose --target {0}', matrix.target) || 'cargo build --release --verbose') }}
 
     - name: Create macOS DMG
       if: runner.os == 'macOS'
       run: |
         mkdir -p dist
-        cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} dist/
+        if [ -n "${{ matrix.target }}" ]; then
+          cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} dist/
+        else
+          cp target/release/${{ matrix.artifact_name }} dist/
+        fi
         create-dmg \
           --volname "gTexViewer" \
           --app-drop-link 600 185 \
@@ -125,7 +117,11 @@ jobs:
     - name: Create Linux archive
       if: runner.os == 'Linux'
       run: |
-        tar -czf ${{ matrix.asset_name }}.tar.gz -C target/${{ matrix.target }}/release ${{ matrix.artifact_name }}
+        if [ -n "${{ matrix.target }}" ]; then
+          tar -czf ${{ matrix.asset_name }}.tar.gz -C target/${{ matrix.target }}/release ${{ matrix.artifact_name }}
+        else
+          tar -czf ${{ matrix.asset_name }}.tar.gz -C target/release ${{ matrix.artifact_name }}
+        fi
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

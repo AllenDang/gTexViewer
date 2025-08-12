@@ -31,6 +31,12 @@ jobs:
         toolchain: ${{ matrix.rust }}
         target: ${{ matrix.target }}
     
+    - name: Install Zig
+      if: matrix.target == 'x86_64-pc-windows-gnu'
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: 0.11.0
+    
     - name: Install cargo-zigbuild
       if: matrix.target == 'x86_64-pc-windows-gnu'
       run: cargo install cargo-zigbuild
@@ -87,6 +93,12 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
         target: ${{ matrix.target }}
+    
+    - name: Install Zig
+      if: matrix.target == 'x86_64-pc-windows-gnu'
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: 0.11.0
     
     - name: Install cargo-zigbuild
       if: matrix.target == 'x86_64-pc-windows-gnu'

@@ -91,18 +91,19 @@ jobs:
           ${{ runner.os }}-cargo-release-
           ${{ runner.os }}-cargo-
 
-    - name: Build release
+    - name: Build release (Windows)
+      if: matrix.target == 'x86_64-pc-windows-gnu'
+      run: cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose
+      
+    - name: Build release (macOS)
+      if: runner.os == 'macOS'
       run: |
-        if [ "${{ matrix.target }}" = "x86_64-pc-windows-gnu" ]; then
-          cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose
-        elif [ "${{ runner.os }}" = "macOS" ]; then
-          cargo build --release --verbose
-          cargo bundle --release
-        elif [ -n "${{ matrix.target }}" ]; then
-          cargo build --release --verbose --target ${{ matrix.target }}
-        else
-          cargo build --release --verbose
-        fi
+        cargo build --release --verbose
+        cargo bundle --release
+        
+    - name: Build release (Linux)
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: cargo build --release --verbose --target ${{ matrix.target }}
 
     - name: Create macOS DMG
       if: runner.os == 'macOS'

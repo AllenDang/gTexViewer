@@ -96,7 +96,8 @@ jobs:
         if [ "${{ matrix.target }}" = "x86_64-pc-windows-gnu" ]; then
           cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose
         elif [ "${{ runner.os }}" = "macOS" ]; then
-          cargo bundle --release --verbose
+          cargo build --release --verbose
+          cargo bundle --release
         elif [ -n "${{ matrix.target }}" ]; then
           cargo build --release --verbose --target ${{ matrix.target }}
         else

@@ -56,11 +56,19 @@ gTexViewer is a specialized image viewer that understands game textures and 3D m
 
 ### Viewing Channels
 
-- Press `R` to view red channel only
-- Press `G` to view green channel only
-- Press `B` to view blue channel only
-- Press `A` to view alpha channel only
-- Press `Esc` to return to normal view
+- Press `1` to return to normal view
+- Press `2` to view red channel only
+- Press `3` to view green channel only
+- Press `4` to view blue channel only
+- Press `5` to view alpha channel only
+- Press `6` to swap red and green channels
+- Press `7` to swap red and blue channels
+- Press `8` to swap green and blue channels
+- Press `C` to cycle through all channel modes
+
+### Other Controls
+
+- Press `R` to recalculate layout and fit images to viewport
 
 ### Command Line Usage
 
@@ -86,4 +94,3 @@ MIT License
 ## Author
 
 **Allen Dang** - [allengnr@gmail.com](mailto:allengnr@gmail.com)
-

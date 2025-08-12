@@ -30,6 +30,10 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
         target: ${{ matrix.target }}
+    
+    - name: Install cargo-zigbuild
+      if: matrix.target == 'x86_64-pc-windows-gnu'
+      run: cargo install cargo-zigbuild
 
     - name: Install system dependencies (Linux)
       if: runner.os == 'Linux'
@@ -42,20 +46,6 @@ jobs:
       run: |
         brew install dav1d
 
-    - name: Install MinGW toolchain
-      if: runner.os == 'Windows' && matrix.target == 'x86_64-pc-windows-gnu'
-      run: |
-        choco install mingw
-
-    - name: Install system dependencies (Windows GNU)
-      if: runner.os == 'Windows' && matrix.target == 'x86_64-pc-windows-gnu'
-      run: |
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-dav1d mingw-w64-x86_64-pkg-config mingw-w64-x86_64-libc++
-        echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" >> $env:GITHUB_ENV
-        echo "PKG_CONFIG=C:\msys64\mingw64\bin\pkg-config.exe" >> $env:GITHUB_ENV
-        echo "PKG_CONFIG_ALLOW_CROSS=1" >> $env:GITHUB_ENV
-        echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
-        echo "RUSTFLAGS=-L C:\msys64\mingw64\lib -l c++ -l c++abi" >> $env:GITHUB_ENV
 
     - name: Cache cargo registry
       uses: actions/cache@v4
@@ -69,10 +59,10 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Run tests
-      run: cargo test --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild' || 'cargo' }} test --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
 
     - name: Run clippy
-      run: cargo clippy ${{ matrix.target && format('--target {0}', matrix.target) || '' }} -- -D warnings
+      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild' || 'cargo' }} clippy ${{ matrix.target && format('--target {0}', matrix.target) || '' }} -- -D warnings
 
     - name: Check formatting
       run: cargo fmt --all -- --check
@@ -97,6 +87,10 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
         target: ${{ matrix.target }}
+    
+    - name: Install cargo-zigbuild
+      if: matrix.target == 'x86_64-pc-windows-gnu'
+      run: cargo install cargo-zigbuild
 
     - name: Install system dependencies (Linux)
       if: runner.os == 'Linux'
@@ -109,20 +103,6 @@ jobs:
       run: |
         brew install dav1d
 
-    - name: Install MinGW toolchain
-      if: runner.os == 'Windows' && matrix.target == 'x86_64-pc-windows-gnu'
-      run: |
-        choco install mingw
-
-    - name: Install system dependencies (Windows GNU)
-      if: runner.os == 'Windows' && matrix.target == 'x86_64-pc-windows-gnu'
-      run: |
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-dav1d mingw-w64-x86_64-pkg-config mingw-w64-x86_64-libc++
-        echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" >> $env:GITHUB_ENV
-        echo "PKG_CONFIG=C:\msys64\mingw64\bin\pkg-config.exe" >> $env:GITHUB_ENV
-        echo "PKG_CONFIG_ALLOW_CROSS=1" >> $env:GITHUB_ENV
-        echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
-        echo "RUSTFLAGS=-L C:\msys64\mingw64\lib -l c++ -l c++abi" >> $env:GITHUB_ENV
 
     - name: Cache cargo registry
       uses: actions/cache@v4
@@ -137,7 +117,7 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Build (debug)
-      run: cargo build --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild' || 'cargo' }} build --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
 
     - name: Build (release)
-      run: cargo build --release --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild' || 'cargo' }} build --release --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}

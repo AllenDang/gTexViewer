@@ -59,10 +59,10 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Run tests
-      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild' || 'cargo' }} test --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+      run: cargo test --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
 
     - name: Run clippy
-      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild' || 'cargo' }} clippy ${{ matrix.target && format('--target {0}', matrix.target) || '' }} -- -D warnings
+      run: cargo clippy ${{ matrix.target && format('--target {0}', matrix.target) || '' }} -- -D warnings
 
     - name: Check formatting
       run: cargo fmt --all -- --check
@@ -117,7 +117,7 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Build (debug)
-      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild' || 'cargo' }} build --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild --target x86_64-pc-windows-gnu --verbose' || format('cargo build --verbose {0}', matrix.target && format('--target {0}', matrix.target) || '') }}
 
     - name: Build (release)
-      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild' || 'cargo' }} build --release --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+      run: ${{ matrix.target == 'x86_64-pc-windows-gnu' && 'cargo zigbuild --target x86_64-pc-windows-gnu --release --verbose' || format('cargo build --release --verbose {0}', matrix.target && format('--target {0}', matrix.target) || '') }}

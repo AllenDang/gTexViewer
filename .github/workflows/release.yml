@@ -11,6 +11,9 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+permissions:
+  contents: write
+
 jobs:
   create-tag-and-release:
     name: Create Tag and Release
@@ -21,24 +24,27 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
 
-    - name: Create and push tag
+    - name: Create tag and release
+      id: create_release
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git tag ${{ inputs.version }}
         git push origin ${{ inputs.version }}
-
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
+        
+        # Create release and capture the upload URL
+        RELEASE_DATA=$(gh release create ${{ inputs.version }} \
+          --title "${{ inputs.version }}" \
+          --generate-notes \
+          --json uploadUrl)
+        
+        echo "upload_url=$(echo $RELEASE_DATA | jq -r '.uploadUrl')" >> $GITHUB_OUTPUT
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ inputs.version }}
-        release_name: ${{ inputs.version }}
-        draft: false
-        prerelease: false
 
   build-release:
     name: Build Release
@@ -161,20 +167,16 @@ jobs:
         tar -czf ${{ matrix.asset_name }}.tar.gz -C target/${{ matrix.target }}/release ${{ matrix.artifact_name }}
 
     - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          ASSET_FILE="${{ matrix.asset_name }}.zip"
+        elif [ "${{ runner.os }}" = "macOS" ]; then
+          ASSET_FILE="${{ matrix.asset_name }}.dmg"
+        else
+          ASSET_FILE="${{ matrix.asset_name }}.tar.gz"
+        fi
+        
+        gh release upload ${{ inputs.version }} "$ASSET_FILE"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-tag-and-release.outputs.upload_url }}
-        asset_path: ${{ 
-          runner.os == 'Windows' && format('{0}.zip', matrix.asset_name) || 
-          runner.os == 'macOS' && format('{0}.dmg', matrix.asset_name) || 
-          format('{0}.tar.gz', matrix.asset_name) }}
-        asset_name: ${{ 
-          runner.os == 'Windows' && format('{0}.zip', matrix.asset_name) || 
-          runner.os == 'macOS' && format('{0}.dmg', matrix.asset_name) || 
-          format('{0}.tar.gz', matrix.asset_name) }}
-        asset_content_type: ${{ 
-          runner.os == 'Windows' && 'application/zip' || 
-          runner.os == 'macOS' && 'application/x-apple-diskimage' || 
-          'application/gzip' }}
+      shell: bash

@@ -38,6 +38,13 @@ jobs:
       run: |
         brew install dav1d
 
+    - name: Install system dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        vcpkg install dav1d:x64-windows pkgconf:x64-windows
+        echo "PKG_CONFIG_PATH=C:\vcpkg\installed\x64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
+        echo "VCPKG_ROOT=C:\vcpkg" >> $env:GITHUB_ENV
+
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
@@ -85,6 +92,13 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew install dav1d
+
+    - name: Install system dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        vcpkg install dav1d:x64-windows pkgconf:x64-windows
+        echo "PKG_CONFIG_PATH=C:\vcpkg\installed\x64-windows\lib\pkgconfig" >> $env:GITHUB_ENV
+        echo "VCPKG_ROOT=C:\vcpkg" >> $env:GITHUB_ENV
 
     - name: Cache cargo registry
       uses: actions/cache@v4

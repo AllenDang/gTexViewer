@@ -69,3 +69,6 @@ itertools = "0.14.0"
 
 # Archive support
 zip = "4"
+
+[build-dependencies]
+winres = "0.1"

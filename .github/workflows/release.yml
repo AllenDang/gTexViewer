@@ -1,0 +1,180 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., v1.0.0)'
+        required: true
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  create-tag-and-release:
+    name: Create Tag and Release
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create and push tag
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag ${{ inputs.version }}
+        git push origin ${{ inputs.version }}
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ inputs.version }}
+        release_name: ${{ inputs.version }}
+        draft: false
+        prerelease: false
+
+  build-release:
+    name: Build Release
+    needs: create-tag-and-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: gtexviewer
+            asset_name: gtexviewer-linux-x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-gnu
+            artifact_name: gtexviewer.exe
+            asset_name: gtexviewer-windows-x86_64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: gtexviewer
+            asset_name: gtexviewer-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: gtexviewer
+            asset_name: gtexviewer-macos-aarch64
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.version }}
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        target: ${{ matrix.target }}
+    
+    - name: Install Zig
+      if: matrix.target == 'x86_64-pc-windows-gnu'
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: 0.13.0
+    
+    - name: Install cargo-zigbuild
+      if: matrix.target == 'x86_64-pc-windows-gnu'
+      run: cargo install cargo-zigbuild
+
+    - name: Install create-dmg for macOS
+      if: runner.os == 'macOS'
+      run: npm install --global create-dmg
+
+    - name: Setup cross-compilation environment
+      if: matrix.target == 'x86_64-pc-windows-gnu'
+      run: |
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-dav1d mingw-w64-x86_64-pkg-config
+        echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" >> $env:GITHUB_ENV
+        echo "PKG_CONFIG=C:\msys64\mingw64\bin\pkg-config.exe" >> $env:GITHUB_ENV
+        echo "PKG_CONFIG_ALLOW_CROSS=1" >> $env:GITHUB_ENV
+        echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
+        echo "CARGO_ZIGBUILD_ZIG_CC_EXTRA_ARGS=--sysroot=C:\msys64\mingw64 -IC:\msys64\mingw64\include" >> $env:GITHUB_ENV
+
+    - name: Install system dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libasound2-dev libudev-dev pkg-config libdav1d-dev libc++-dev libc++abi-dev
+
+    - name: Install system dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install dav1d
+
+    - name: Cache cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-release-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-release-${{ matrix.target }}-
+          ${{ runner.os }}-cargo-release-
+          ${{ runner.os }}-cargo-
+
+    - name: Build release
+      run: |
+        if [ "${{ matrix.target }}" = "x86_64-pc-windows-gnu" ]; then
+          cargo zigbuild --target ${{ matrix.target }} --release --verbose
+        else
+          cargo build --target ${{ matrix.target }} --release --verbose
+        fi
+      shell: bash
+
+    - name: Create macOS DMG
+      if: runner.os == 'macOS'
+      run: |
+        mkdir -p dist
+        cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} dist/
+        create-dmg \
+          --volname "gTexViewer" \
+          --volicon "assets/icon/app.ico" \
+          --window-pos 200 120 \
+          --window-size 800 400 \
+          --icon-size 100 \
+          --icon "gtexviewer" 200 190 \
+          --hide-extension "gtexviewer" \
+          --app-drop-link 600 185 \
+          "${{ matrix.asset_name }}.dmg" \
+          "dist/"
+
+    - name: Create Windows ZIP
+      if: runner.os == 'Windows'
+      run: |
+        7z a ${{ matrix.asset_name }}.zip ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+
+    - name: Create Linux archive
+      if: runner.os == 'Linux'
+      run: |
+        tar -czf ${{ matrix.asset_name }}.tar.gz -C target/${{ matrix.target }}/release ${{ matrix.artifact_name }}
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-tag-and-release.outputs.upload_url }}
+        asset_path: ${{ 
+          runner.os == 'Windows' && format('{0}.zip', matrix.asset_name) || 
+          runner.os == 'macOS' && format('{0}.dmg', matrix.asset_name) || 
+          format('{0}.tar.gz', matrix.asset_name) }}
+        asset_name: ${{ 
+          runner.os == 'Windows' && format('{0}.zip', matrix.asset_name) || 
+          runner.os == 'macOS' && format('{0}.dmg', matrix.asset_name) || 
+          format('{0}.tar.gz', matrix.asset_name) }}
+        asset_content_type: ${{ 
+          runner.os == 'Windows' && 'application/zip' || 
+          runner.os == 'macOS' && 'application/x-apple-diskimage' || 
+          'application/gzip' }}

@@ -958,7 +958,7 @@ checksum = "00810f1d8b74be64b13dbf3db89ac67740615d6c891f0e7b6179326533011a07"
 [[package]]
 name = "ktx2-rw"
 version = "0.1.0"
-source = "git+https://github.com/AllenDang/ktx2-rw#3044b3db8acf57307916a70d1ed495d4d6de33f1"
+source = "git+https://github.com/AllenDang/ktx2-rw#293d2076d70b3297864bb0c5b46da200486eed4a"
 dependencies = [
  "bindgen",
  "libc",
@@ -1055,7 +1055,7 @@ dependencies = [
 [[package]]
 name = "macroquad"
 version = "0.4.14"
-source = "git+https://github.com/AllenDang/macroquad#d9d5223ffce1c54ab11f3c3f91c00db38de990f0"
+source = "git+https://github.com/AllenDang/macroquad#d0478c0da5c565b0c86fb0b88c8fa7345a760922"
 dependencies = [
  "fontdue",
  "glam",
@@ -1068,7 +1068,7 @@ dependencies = [
 [[package]]
 name = "macroquad_macro"
 version = "0.1.8"
-source = "git+https://github.com/AllenDang/macroquad#d9d5223ffce1c54ab11f3c3f91c00db38de990f0"
+source = "git+https://github.com/AllenDang/macroquad#d0478c0da5c565b0c86fb0b88c8fa7345a760922"
 
 [[package]]
 name = "malloc_buf"
@@ -1104,7 +1104,7 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 [[package]]
 name = "miniquad"
 version = "0.4.8"
-source = "git+https://github.com/AllenDang/miniquad#ebef781a1be1fc3925a623b64d7bea0b2baab8b5"
+source = "git+https://github.com/AllenDang/miniquad#383accf1f1705651a2624891ac24c34169ec6d28"
 dependencies = [
  "libc",
  "ndk-sys",
@@ -1468,9 +1468,9 @@ dependencies = [
 
 [[package]]
 name = "rayon"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b418a60154510ca1a002a752ca9714984e21e4241e804d32555251faf8b78ffa"
+checksum = "368f01d005bf8fd9b1206fb6fa653e6c4a81ceb1466406b81792d87c5677a58f"
 dependencies = [
  "either",
  "rayon-core",
@@ -1478,9 +1478,9 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.12.1"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1465873a3dfdaa8ae7cb14b4383657caab0b3e8a0aa9ae8e04b044854c8dfce2"
+checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
